@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface Issue {
   id: string;
@@ -130,6 +129,12 @@ const IconStatusCompleted = () => (
   </svg>
 );
 
+const IconTrash = () => (
+  <svg className="w-3.5 h-3.5 text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
+
 // --- LOGO BRANDING ---
 const LogoIcon = () => (
   <img 
@@ -201,28 +206,6 @@ export default function Home() {
     }
   }, [router]);
 
-  // --- SHORTCUT DETECTOR (Cmd+K atau Ctrl+K, dan Navigasi Keyboard) ---
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle Command Menu
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsCommandMenuOpen(prev => !prev);
-      }
-      
-      // Close Modals on ESC
-      if (e.key === 'Escape') {
-        setIsCommandMenuOpen(false);
-        setIsNewProjectModalOpen(false);
-        setIsMoreMenuOpen(false);
-        setIsWorkspaceMenuOpen(false);
-        setIsAddingInline(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   // --- TOAST TRIGGER HELPER ---
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -251,6 +234,11 @@ export default function Home() {
       }
       return issue;
     }));
+  };
+
+  const handleDeleteIssue = (id: string) => {
+    setIssues(prev => prev.filter(issue => issue.id !== id));
+    showToast(`Tugas ${id} berhasil dihapus.`);
   };
 
   const handleCreateProject = (e: React.FormEvent) => {
@@ -334,7 +322,6 @@ export default function Home() {
     return (
       <div className="w-full h-screen bg-bg-canvas flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
-          {/* Subtle loading state */}
           <div className="animate-pulse flex space-x-2">
             <div className="w-2.5 h-2.5 bg-text-muted rounded-full"></div>
             <div className="w-2.5 h-2.5 bg-text-muted rounded-full animate-bounce"></div>
@@ -351,13 +338,13 @@ export default function Home() {
       {/* ==========================================
           SIDEBAR KIRI (Workspace Navigation)
           ========================================== */}
-      <aside className="w-[240px] flex flex-col justify-between border-r border-border-default bg-bg-canvas py-3 px-3.5 text-[13px] shrink-0">
+      <aside className="w-[240px] flex flex-col justify-between border-r border-border-default bg-bg-canvas py-3.5 px-4 text-[13px] shrink-0">
         <div>
           {/* Workspace Selector Dropdown (Sesuai dengan image_9ef397.png) */}
           <div className="relative">
             <div 
               onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
-              className="flex items-center justify-between p-1.5 rounded-lg hover:bg-bg-element cursor-pointer mb-3.5 transition-colors duration-75"
+              className="flex items-center justify-between p-1.5 rounded-lg hover:bg-bg-element cursor-pointer mb-4 transition-colors duration-75"
             >
               <div className="flex items-center gap-2.5">
                 {/* Logo kustom CP menggantikan inisial biasa */}
@@ -373,12 +360,12 @@ export default function Home() {
 
             {/* Dropdown Menu (Direproduksi penuh berdasarkan image_9ef397.png) */}
             {isWorkspaceMenuOpen && (
-              <div className="absolute left-0 top-9 w-[220px] bg-bg-surface border border-border-default rounded-xl py-1 shadow-[0_8px_30px_rgb(0,0,0,0.06),0_1px_2px_rgb(0,0,0,0.04)] z-30">
-                <div className="px-3 py-1 text-text-muted text-[10px] font-bold uppercase tracking-wider select-none">Menu Platform</div>
+              <div className="absolute left-0 top-9 w-[220px] bg-bg-surface border border-border-default rounded-xl py-1 shadow-[0_8px_30px_rgb(0,0,0,0.06),0_1px_2px_rgb(0,0,0,0.04)] z-30 premium-popover">
+                <div className="px-3 py-1.5 text-text-muted text-[10px] font-bold uppercase tracking-wider select-none">Menu Platform</div>
                 
                 <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer flex items-center justify-between text-text-primary text-[12px] font-medium" onClick={() => showToast('Membuka Pengaturan...')}>
                   <span>Pengaturan / Settings</span>
-                  <span className="text-[10px] text-text-muted">G then S</span>
+                  <span className="kbd-key">G then S</span>
                 </div>
 
                 <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer text-text-primary text-[12px] font-medium" onClick={() => showToast('Membuka menu Undang Anggota...')}>
@@ -393,15 +380,15 @@ export default function Home() {
 
                 <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer flex items-center justify-between text-text-primary text-[12px] font-medium" onClick={() => showToast('Beralih Workspace...')}>
                   <span>Ganti Workspace</span>
-                  <span className="text-[10px] text-text-muted">O then W</span>
+                  <span className="kbd-key">O then W</span>
                 </div>
 
                 <div 
                   onClick={handleLogout}
-                  className="px-3 py-1.5 hover:bg-danger/10 hover:text-danger cursor-pointer flex items-center justify-between text-text-primary text-[12px] font-semibold"
+                  className="px-3 py-1.5 hover:bg-danger/10 hover:text-danger cursor-pointer flex items-center justify-between text-text-primary text-[12px] font-bold"
                 >
                   <span>Keluar / Log out</span>
-                  <span className="text-[10px] text-text-muted">Alt ⇧ Q</span>
+                  <span className="kbd-key">Alt ⇧ Q</span>
                 </div>
               </div>
             )}
@@ -414,14 +401,17 @@ export default function Home() {
           >
             <div className="flex items-center gap-2">
               <IconSearch />
-              <span className="text-[12px] text-text-secondary">Cari sesuatu...</span>
+              <span className="text-[12px] text-text-secondary font-medium">Cari sesuatu...</span>
             </div>
-            <span className="text-[10px] text-text-muted font-mono tracking-widest bg-bg-canvas px-1 py-0.5 rounded border border-border-default">⌘K</span>
+            <span className="kbd-key">⌘K</span>
           </button>
 
           {/* Kategori Menu Utama */}
           <nav className="space-y-[3px]">
-            <div className="flex items-center justify-between px-2 py-1 text-text-secondary hover:bg-bg-element/80 rounded-md cursor-pointer transition-none">
+            <div 
+              onClick={() => showToast('Membuka Kotak Masuk...')}
+              className="flex items-center justify-between px-2 py-1.5 text-text-secondary hover:bg-bg-element/85 rounded-md cursor-pointer transition-all duration-75 select-none"
+            >
               <div className="flex items-center gap-2">
                 <IconInbox />
                 <span className="font-semibold text-text-secondary">Kotak Masuk</span>
@@ -429,52 +419,61 @@ export default function Home() {
               <span className="w-4 h-4 bg-bg-element text-text-secondary rounded flex items-center justify-center text-[9px] font-bold">1</span>
             </div>
 
-            <div className="flex items-center gap-2 px-2 py-1 text-text-secondary hover:bg-bg-element/80 rounded-md cursor-pointer transition-none">
+            <div 
+              onClick={() => showToast('Membuka Isu Saya...')}
+              className="flex items-center gap-2 px-2 py-1.5 text-text-secondary hover:bg-bg-element/85 rounded-md cursor-pointer transition-all duration-75 select-none"
+            >
               <IconIssue />
               <span className="font-semibold text-text-secondary">Isu Saya</span>
             </div>
 
             {/* Kelompok Menu: Workspace */}
-            <div className="pt-3 pb-1 px-2 text-[10px] font-bold text-text-muted uppercase tracking-wider select-none">Workspace</div>
+            <div className="pt-3.5 pb-1 px-2 text-[10px] font-bold text-text-muted uppercase tracking-wider select-none">Workspace</div>
             
             <div 
               onClick={() => setActiveTab('projects')}
-              className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer transition-none ${activeTab === 'projects' ? 'bg-bg-element text-text-primary font-bold shadow-[0_1px_2px_rgba(0,0,0,0.01)]' : 'text-text-secondary hover:bg-bg-element/80'}`}
+              className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-all duration-75 ${activeTab === 'projects' ? 'bg-bg-element text-text-primary font-bold shadow-[0_1px_2px_rgba(0,0,0,0.015)]' : 'text-text-secondary hover:bg-bg-element/85'}`}
             >
-              <IconProjects />
-              <span>Proyek</span>
+              <div className="flex items-center gap-2">
+                <IconProjects />
+                <span>Proyek</span>
+              </div>
+              <span className="kbd-key opacity-40">G P</span>
             </div>
 
             <div 
               onClick={() => setActiveTab('views')}
-              className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer transition-none ${activeTab === 'views' ? 'bg-bg-element text-text-primary font-bold shadow-[0_1px_2px_rgba(0,0,0,0.01)]' : 'text-text-secondary hover:bg-bg-element/80'}`}
+              className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-all duration-75 ${activeTab === 'views' ? 'bg-bg-element text-text-primary font-bold shadow-[0_1px_2px_rgba(0,0,0,0.015)]' : 'text-text-secondary hover:bg-bg-element/85'}`}
             >
-              <IconViews />
-              <span>Tampilan Kustom</span>
+              <div className="flex items-center gap-2">
+                <IconViews />
+                <span>Tampilan Kustom</span>
+              </div>
+              <span className="kbd-key opacity-40">G V</span>
             </div>
 
             {/* Menu Dropdown Kustom */}
             <div className="relative">
               <div 
                 onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-                className="flex items-center gap-2 px-2 py-1 text-text-secondary hover:bg-bg-element/80 rounded-md cursor-pointer transition-none"
+                className="flex items-center gap-2 px-2 py-1.5 text-text-secondary hover:bg-bg-element/85 rounded-md cursor-pointer transition-none select-none"
               >
                 <span className="font-bold tracking-widest text-[11px]">···</span>
                 <span>Lainnya</span>
               </div>
               
               {isMoreMenuOpen && (
-                <div className="absolute left-1 top-7 w-[160px] bg-bg-surface border border-border-default rounded-lg py-1 shadow-[0_4px_12px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.05)] z-20">
-                  <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer flex items-center gap-2 text-text-secondary">
+                <div className="absolute left-1 top-7 w-[160px] bg-bg-surface border border-border-default rounded-lg py-1 shadow-[0_4px_12px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.05)] z-20 premium-popover">
+                  <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer flex items-center gap-2 text-text-secondary text-[12px] font-medium" onClick={() => showToast('Membuka Daftar Tim...')}>
                     <div className="w-1.5 h-1.5 rounded-full bg-text-muted"></div>
                     <span>Daftar Tim</span>
                   </div>
-                  <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer flex items-center gap-2 text-text-secondary">
+                  <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer flex items-center gap-2 text-text-secondary text-[12px] font-medium" onClick={() => showToast('Membuka Daftar Anggota...')}>
                     <div className="w-1.5 h-1.5 rounded-full bg-text-muted"></div>
                     <span>Anggota</span>
                   </div>
                   <hr className="my-1 border-border-default" />
-                  <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer text-text-muted hover:text-text-primary text-[12px]">
+                  <div className="px-3 py-1.5 hover:bg-bg-canvas cursor-pointer text-text-muted hover:text-text-primary text-[12px] font-semibold" onClick={() => showToast('Mengustomisasi sidebar...')}>
                     Kustomisasi Sidebar
                   </div>
                 </div>
@@ -488,31 +487,32 @@ export default function Home() {
 
             <div 
               onClick={() => setActiveTab('issues')}
-              className={`flex items-center justify-between px-2 py-1 rounded-md cursor-pointer transition-none ${activeTab === 'issues' ? 'bg-bg-element text-text-primary font-bold shadow-[0_1px_2px_rgba(0,0,0,0.01)]' : 'text-text-secondary hover:bg-bg-element/80'}`}
+              className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-all duration-75 ${activeTab === 'issues' ? 'bg-bg-element text-text-primary font-bold shadow-[0_1px_2px_rgba(0,0,0,0.015)]' : 'text-text-secondary hover:bg-bg-element/85'}`}
             >
               <div className="flex items-center gap-2">
                 <span className="text-accent font-bold text-xs">⚡</span>
                 <span className="font-semibold">Cahyadi Prasetyo</span>
               </div>
+              <span className="kbd-key opacity-40">G I</span>
             </div>
             
             <div className="pl-6 space-y-[2px]">
               <div 
                 onClick={() => { setActiveTab('issues'); setActiveFilter('all'); }}
-                className="flex items-center justify-between px-2 py-1 text-text-secondary hover:bg-bg-element/80 rounded-md cursor-pointer transition-none"
+                className={`flex items-center justify-between px-2 py-1 text-text-secondary hover:bg-bg-element/80 rounded-md cursor-pointer transition-none ${activeFilter === 'all' && activeTab === 'issues' ? 'text-text-primary font-bold bg-bg-element/40' : ''}`}
               >
                 <span>Semua Isu</span>
                 <span className="text-[11px] text-text-muted font-mono">{issues.length}</span>
               </div>
               <div 
                 onClick={() => { setActiveTab('issues'); setActiveFilter('active'); }}
-                className={`px-2 py-1 rounded-md cursor-pointer transition-none ${activeFilter === 'active' && activeTab === 'issues' ? 'text-text-primary font-bold bg-bg-element/50' : 'text-text-secondary hover:bg-bg-element/80'}`}
+                className={`px-2 py-1 rounded-md cursor-pointer transition-none ${activeFilter === 'active' && activeTab === 'issues' ? 'text-text-primary font-bold bg-bg-element/45' : 'text-text-secondary hover:bg-bg-element/80'}`}
               >
                 Aktif
               </div>
               <div 
                 onClick={() => { setActiveTab('issues'); setActiveFilter('backlog'); }}
-                className={`px-2 py-1 rounded-md cursor-pointer transition-none ${activeFilter === 'backlog' && activeTab === 'issues' ? 'text-text-primary font-bold bg-bg-element/50' : 'text-text-secondary hover:bg-bg-element/80'}`}
+                className={`px-2 py-1 rounded-md cursor-pointer transition-none ${activeFilter === 'backlog' && activeTab === 'issues' ? 'text-text-primary font-bold bg-bg-element/45' : 'text-text-secondary hover:bg-bg-element/80'}`}
               >
                 Backlog
               </div>
@@ -521,30 +521,30 @@ export default function Home() {
         </div>
 
         {/* Footer Sidebar */}
-        <div className="space-y-2 border-t border-border-default pt-2 shrink-0 select-none">
+        <div className="space-y-2.5 border-t border-border-default pt-2.5 shrink-0 select-none font-medium">
           <div className="flex items-center gap-2 p-1 text-text-secondary hover:text-text-primary cursor-pointer transition-colors duration-75">
-            <span className="font-mono text-text-muted text-[11px]">?</span>
+            <span className="kbd-key font-mono">?</span>
             <span>Bantuan & Dukungan</span>
           </div>
           <div className="flex items-center justify-between text-text-muted text-[11px] px-1">
             <span>Umpan Balik</span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
-              Aktif
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.7)]"></span>
+              Koneksi Aktif
             </span>
           </div>
         </div>
       </aside>
 
       {/* ==========================================
-          AREA KONTEN UTAMA & WORKSPACE
+          AREA KONTEN UTAMA & WORKSPACE (Tweak: bg-dot-pattern)
           ========================================== */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-bg-canvas">
+      <main className="flex-1 flex flex-col overflow-hidden bg-bg-canvas bg-dot-pattern">
         
         {/* TOP HEADER BAR */}
-        <header className="h-[48px] border-b border-border-default bg-bg-surface flex items-center justify-between px-6 shrink-0">
+        <header className="h-[48px] border-b border-border-default bg-bg-surface flex items-center justify-between px-6 shrink-0 z-10 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
           <div className="flex items-center gap-2">
-            <span className="text-text-muted hover:text-text-primary cursor-pointer text-[12px] font-medium transition-colors duration-75">Workspace</span>
+            <span className="text-text-muted hover:text-text-primary cursor-pointer text-[12px] font-semibold transition-colors duration-75">Workspace</span>
             <span className="text-border-default text-xs">/</span>
             <h1 className="text-[13px] font-bold text-text-primary capitalize flex items-center gap-1.5 select-all">
               {activeTab === 'issues' ? 'Isu Utama' : activeTab === 'projects' ? 'Daftar Proyek Kinerja' : 'View Kustom'}
@@ -556,23 +556,26 @@ export default function Home() {
             {/* Tombol aksi global */}
             <button 
               onClick={() => setIsNewProjectModalOpen(true)}
-              className="h-7.5 px-3 bg-accent hover:bg-accent/90 text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-colors duration-75 cursor-pointer keyboard-focus"
+              className="h-7.5 px-3 bg-accent hover:bg-accent/90 text-white text-[12px] font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all duration-75 cursor-pointer keyboard-focus btn-active-scale"
             >
               <IconPlus />
               <span>Proyek Baru</span>
             </button>
             <div className="w-[1px] h-4 bg-border-default"></div>
-            <button className="p-1 hover:bg-bg-element rounded-md transition-colors duration-75 cursor-pointer">
+            <button 
+              onClick={() => showToast('Tidak ada notifikasi baru.')}
+              className="p-1 hover:bg-bg-element rounded-md transition-colors duration-75 cursor-pointer"
+            >
               <IconBell />
             </button>
-            <div className="w-6.5 h-6.5 rounded-md bg-accent text-white flex items-center justify-center font-bold text-[10px] shadow-[0_1px_3px_rgba(94,106,210,0.2)]">
+            <div className="w-6.5 h-6.5 rounded-md bg-accent text-white flex items-center justify-center font-bold text-[10px] shadow-[0_2px_6px_rgba(94,106,210,0.3)] select-none">
               {currentUser ? currentUser.name[0].toUpperCase() : 'C'}
             </div>
           </div>
         </header>
 
         {/* WORKSPACE VIEWPORT */}
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col">
+        <div className="flex-1 overflow-y-auto p-6 flex flex-col z-10">
           
           {/* ==========================================
               HALAMAN 1: SEMUA ISU / TASK MANAGER
@@ -581,22 +584,22 @@ export default function Home() {
             <div className="flex-1 flex flex-col space-y-4 max-w-6xl w-full mx-auto">
               {/* Kategori Filter Tab */}
               <div className="flex items-center justify-between">
-                <div className="flex gap-1.5">
+                <div className="flex gap-1.5 select-none">
                   <button 
                     onClick={() => setActiveFilter('all')}
-                    className={`h-7 px-3.5 text-[12px] rounded-full transition-colors duration-75 cursor-pointer font-medium ${activeFilter === 'all' ? 'bg-bg-surface border border-border-default text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.01)]' : 'text-text-secondary hover:bg-bg-surface/60'}`}
+                    className={`h-7 px-3.5 text-[12px] rounded-full transition-colors duration-75 cursor-pointer font-semibold ${activeFilter === 'all' ? 'bg-bg-surface border border-border-default text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.015)]' : 'text-text-secondary hover:bg-bg-surface/60'}`}
                   >
                     Semua Isu
                   </button>
                   <button 
                     onClick={() => setActiveFilter('active')}
-                    className={`h-7 px-3.5 text-[12px] rounded-full transition-colors duration-75 cursor-pointer font-medium ${activeFilter === 'active' ? 'bg-bg-surface border border-border-default text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.01)]' : 'text-text-secondary hover:bg-bg-surface/60'}`}
+                    className={`h-7 px-3.5 text-[12px] rounded-full transition-colors duration-75 cursor-pointer font-semibold ${activeFilter === 'active' ? 'bg-bg-surface border border-border-default text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.015)]' : 'text-text-secondary hover:bg-bg-surface/60'}`}
                   >
                     Sedang Aktif
                   </button>
                   <button 
                     onClick={() => setActiveFilter('backlog')}
-                    className={`h-7 px-3.5 text-[12px] rounded-full transition-colors duration-75 cursor-pointer font-medium ${activeFilter === 'backlog' ? 'bg-bg-surface border border-border-default text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.01)]' : 'text-text-secondary hover:bg-bg-surface/60'}`}
+                    className={`h-7 px-3.5 text-[12px] rounded-full transition-colors duration-75 cursor-pointer font-semibold ${activeFilter === 'backlog' ? 'bg-bg-surface border border-border-default text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.015)]' : 'text-text-secondary hover:bg-bg-surface/60'}`}
                   >
                     Daftar Backlog
                   </button>
@@ -618,7 +621,7 @@ export default function Home() {
               </div>
 
               {/* Kontainer Utama Box Putih (Design Tweak: Softer Rounded-xl & subtle border accent) */}
-              <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/40">
+              <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/40">
                 {/* Header Kolom Kelompok */}
                 <div className="h-[38px] bg-[#fbfbfb] border-b border-border-default px-4 flex items-center justify-between text-text-secondary text-[11px] font-bold tracking-wider uppercase select-none">
                   <div className="flex items-center gap-2">
@@ -643,10 +646,10 @@ export default function Home() {
                       placeholder="Apa yang ingin dicapai selanjutnya? Tekan Enter untuk menyimpan..." 
                       value={inlineTitle}
                       onChange={(e) => setInlineTitle(e.target.value)}
-                      className="flex-1 bg-transparent border-none text-[13px] text-text-primary focus:outline-none focus:ring-0 placeholder-text-muted"
+                      className="flex-1 bg-transparent border-none text-[13px] text-text-primary focus:outline-none focus:ring-0 placeholder-text-muted font-medium"
                       autoFocus
                     />
-                    <button type="submit" className="text-[11px] bg-bg-element hover:bg-border-default text-text-primary px-2.5 py-1 rounded-md transition-none cursor-pointer font-bold">Simpan</button>
+                    <button type="submit" className="text-[10px] bg-bg-element hover:bg-border-default text-text-primary px-2.5 py-1 rounded-md transition-none cursor-pointer font-bold">Simpan ↵</button>
                   </form>
                 )}
 
@@ -655,18 +658,18 @@ export default function Home() {
                   {filteredIssues.map((issue) => (
                     <div 
                       key={issue.id} 
-                      className={`h-9 px-4 flex items-center justify-between group hover:bg-bg-element/40 transition-none text-[13px] ${issue.completed ? 'opacity-60 bg-bg-canvas/30' : ''}`}
+                      className={`h-9 px-4 flex items-center justify-between group hover:bg-bg-element/30 transition-none text-[13px] ${issue.completed ? 'opacity-60 bg-bg-canvas/30' : ''}`}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0 mr-4">
                         {/* Status Checkbox */}
                         <button 
                           onClick={() => handleToggleComplete(issue.id)}
-                          className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors duration-75 cursor-pointer ${issue.completed ? 'bg-accent/10 border border-accent/30' : 'border border-border-default hover:border-text-secondary bg-bg-surface'}`}
+                          className={`w-4 h-4 rounded-full flex items-center justify-center transition-colors duration-75 cursor-pointer shrink-0 ${issue.completed ? 'bg-accent/10 border border-accent/30' : 'border border-border-default hover:border-text-secondary bg-bg-surface'}`}
                         >
                           {issue.completed ? (
                             <div className="w-1.5 h-1.5 rounded-full bg-accent"></div>
                           ) : issue.status === 'Active' ? (
-                            <div className="w-1.5 h-1.5 rounded-full bg-warning"></div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse"></div>
                           ) : null}
                         </button>
 
@@ -684,10 +687,22 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* Detail Atribut Sisi Kanan */}
-                      <div className="flex items-center gap-4 shrink-0 text-text-secondary text-[11px]">
+                      {/* Detail Atribut Sisi Kanan (Hover actions included) */}
+                      <div className="flex items-center gap-4 shrink-0 text-text-secondary text-[11px] font-medium">
+                        
+                        {/* Inline Actions Menu (Reveals only on hover, extremely premium layout detail) */}
+                        <div className="opacity-0 group-hover:opacity-100 flex items-center gap-2 transition-opacity duration-75">
+                          <button 
+                            onClick={() => handleDeleteIssue(issue.id)}
+                            className="p-1 hover:bg-danger/10 hover:text-danger rounded-md transition-colors cursor-pointer"
+                            title="Hapus Isu"
+                          >
+                            <IconTrash />
+                          </button>
+                        </div>
+
                         {/* Prioritas Badge */}
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] border font-semibold ${
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] border font-bold ${
                           issue.priority === 'Urgent' ? 'bg-danger/10 border-danger/20 text-danger' :
                           issue.priority === 'High' ? 'bg-warning/10 border-warning/20 text-warning' :
                           issue.priority === 'Medium' ? 'bg-bg-element border-border-default text-text-primary' :
@@ -703,10 +718,10 @@ export default function Home() {
 
                         {/* Penanggung Jawab */}
                         <div className="flex items-center gap-1.5">
-                          <div className="w-4 h-4 rounded-md bg-accent text-white flex items-center justify-center text-[7px] font-bold shadow-[0_1px_2px_rgba(94,106,210,0.1)]">
+                          <div className="w-4 h-4 rounded-md bg-accent text-white flex items-center justify-center text-[7px] font-bold shadow-[0_1px_2px_rgba(94,106,210,0.1)] select-none">
                             {issue.assignee[0]}
                           </div>
-                          <span className="hidden sm:inline text-text-secondary text-[11px] font-semibold">{issue.assignee}</span>
+                          <span className="hidden sm:inline text-text-secondary text-[11px] font-bold">{issue.assignee}</span>
                         </div>
 
                         {/* Tenggat Waktu */}
@@ -739,7 +754,7 @@ export default function Home() {
                 </div>
 
                 {/* Card Container: Softer rounded-xl and gradient border tweak */}
-                <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/40">
+                <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/40">
                   {/* Table Header */}
                   <div className="h-9 bg-[#fbfbfb] border-b border-border-default px-4 flex items-center text-[11px] font-bold text-text-muted uppercase tracking-wider select-none">
                     <span className="w-1/2">Nama Proyek</span>
@@ -754,9 +769,9 @@ export default function Home() {
                       <div key={proj.id} className="h-10 px-4 flex items-center hover:bg-bg-canvas/40 transition-none text-[13px]">
                         {/* Nama Proyek */}
                         <div className="w-1/2 flex items-center gap-2.5 min-w-0">
-                          <div className="w-5 h-5 rounded bg-bg-canvas flex items-center justify-center border border-border-default text-[11px] shrink-0">📦</div>
+                          <div className="w-5 h-5 rounded bg-bg-canvas flex items-center justify-center border border-border-default text-[11px] shrink-0 font-bold">📦</div>
                           <span className="font-bold text-text-primary truncate">{proj.name}</span>
-                          <span className="text-[10px] bg-bg-canvas text-text-secondary px-1.5 py-0.5 rounded font-mono border border-border-default shrink-0">{proj.id}</span>
+                          <span className="text-[9px] bg-bg-canvas text-text-secondary px-1.5 py-0.5 rounded font-mono border border-border-default shrink-0">{proj.id}</span>
                         </div>
 
                         {/* Status Kesehatan */}
@@ -772,7 +787,7 @@ export default function Home() {
 
                         {/* Prioritas / Progress */}
                         <div className="w-1/6 flex flex-col justify-center items-center">
-                          <span className="text-[11px] text-text-secondary font-semibold">{proj.priority}</span>
+                          <span className="text-[11px] text-text-secondary font-bold">{proj.priority}</span>
                           {/* Progress bar mini */}
                           <div className="w-16 h-1.5 bg-bg-canvas rounded-full mt-1 overflow-hidden border border-border-default">
                             <div className="h-full bg-accent" style={{ width: `${proj.progress}%` }}></div>
@@ -787,9 +802,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Bagian Kanan: Split-View Detail Kesehatan (25% - 30% Lebar - Design Tweak: Softer Rounded-xl) */}
-              <div className="flex-1 w-[280px] md:w-[300px] bg-bg-surface border border-border-default rounded-xl p-5 flex flex-col space-y-4 shrink-0 shadow-[0_4px_20px_rgba(0,0,0,0.015)] h-fit">
-                <div className="flex border-b border-border-default pb-2">
+              {/* Bagian Kanan: Split-View Detail Kesehatan (25% - 30% Lebar) */}
+              <div className="flex-1 w-[280px] md:w-[300px] bg-bg-surface border border-border-default rounded-xl p-5 flex flex-col space-y-4 shrink-0 shadow-[0_8px_30px_rgba(0,0,0,0.015)] h-fit">
+                <div className="flex border-b border-border-default pb-2 select-none">
                   <button 
                     onClick={() => setActiveInsightTab('health')}
                     className={`flex-1 text-center py-1 text-[12px] font-bold transition-colors duration-75 cursor-pointer ${activeInsightTab === 'health' ? 'text-text-primary border-b-2 border-accent' : 'text-text-muted hover:text-text-secondary'}`}
@@ -807,10 +822,10 @@ export default function Home() {
                 {activeInsightTab === 'health' ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-success"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
                       <span className="text-[12px] font-bold text-text-primary">Seluruh tim sehat</span>
                     </div>
-                    <p className="text-[11px] text-text-secondary leading-relaxed font-medium">
+                    <p className="text-[11px] text-text-secondary leading-relaxed font-semibold">
                       Target kinerja berjalan lancar. Belum ada hambatan (blockers) baru yang dilaporkan dalam 24 jam terakhir. Sinkronisasi data real-time aktif.
                     </p>
                   </div>
@@ -819,11 +834,11 @@ export default function Home() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="font-bold text-text-primary">Cahyadi Prasetyo</span>
-                        <span className="text-text-secondary font-semibold">Lead Tech (6 Isu)</span>
+                        <span className="text-text-secondary font-bold">Lead Tech (6 Isu)</span>
                       </div>
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="font-bold text-text-primary">Prasetyo A.</span>
-                        <span className="text-text-secondary font-semibold">Lead Design (2 Isu)</span>
+                        <span className="text-text-secondary font-bold">Lead Design (2 Isu)</span>
                       </div>
                     </div>
                   </div>
@@ -831,7 +846,7 @@ export default function Home() {
 
                 <div className="pt-3 border-t border-border-default">
                   <h4 className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2 select-none">Metrik Kunci Proyek</h4>
-                  <div className="space-y-2 text-[12px] font-semibold">
+                  <div className="space-y-2 text-[12px] font-bold">
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Isu Terbuka:</span>
                       <span className="text-text-primary font-mono tabular-nums">
@@ -844,7 +859,7 @@ export default function Home() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Divisi Terlibat:</span>
-                      <span className="text-accent">3 Divisi</span>
+                      <span className="text-accent font-semibold">3 Divisi Utama</span>
                     </div>
                   </div>
                 </div>
@@ -859,9 +874,9 @@ export default function Home() {
           {activeTab === 'views' && (
             <div className="flex-1 flex flex-col space-y-4 max-w-6xl w-full mx-auto">
               {/* Box Pembuat View Kustom (Frameless Component - Tweak: Rounded-xl) */}
-              <div className="bg-bg-surface border border-border-default rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/40 space-y-4">
+              <div className="bg-bg-surface border border-border-default rounded-xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/40 space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded bg-bg-canvas border border-border-default flex items-center justify-center text-text-secondary text-sm shrink-0">⚡</div>
+                  <div className="w-8 h-8 rounded bg-bg-canvas border border-border-default flex items-center justify-center text-text-secondary text-sm shrink-0 font-bold">⚡</div>
                   <div className="flex-1 min-w-0">
                     <input 
                       type="text" 
@@ -871,15 +886,15 @@ export default function Home() {
                     <input 
                       type="text" 
                       placeholder="Tambahkan deskripsi singkat mengenai visualisasi ini (opsional)..." 
-                      className="w-full text-[12px] text-text-secondary border-none p-0 mt-1.5 focus:ring-0 placeholder-text-muted outline-none"
+                      className="w-full text-[12px] text-text-secondary border-none p-0 mt-1.5 focus:ring-0 placeholder-text-muted outline-none font-medium"
                     />
                   </div>
                   
                   <div className="flex gap-1.5 shrink-0 select-none">
-                    <span className="text-[11px] bg-bg-canvas hover:bg-bg-element text-text-secondary px-2.5 py-1 rounded border border-border-default cursor-pointer flex items-center gap-1 font-semibold transition-colors">
+                    <span className="text-[11px] bg-bg-canvas hover:bg-bg-element text-text-secondary px-2.5 py-1 rounded border border-border-default cursor-pointer flex items-center gap-1 font-bold transition-colors">
                       🔒 Simpan ke Personal
                     </span>
-                    <button className="h-7 px-3 bg-text-primary hover:bg-text-primary/95 text-bg-surface rounded-md text-[11px] font-bold cursor-pointer transition-colors duration-75">
+                    <button className="h-7 px-3 bg-text-primary hover:bg-text-primary/95 text-bg-surface rounded-md text-[11px] font-bold cursor-pointer transition-colors duration-75 btn-active-scale">
                       Buat View
                     </button>
                   </div>
@@ -887,7 +902,7 @@ export default function Home() {
               </div>
 
               {/* Tampilan Sederhana daftar isu yang difilter di bawahnya */}
-              <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/20">
+              <div className="bg-bg-surface border border-border-default rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.015)] border-l-4 border-l-accent/20">
                 <div className="px-4 py-2 bg-[#fbfbfb] border-b border-border-default text-text-muted text-[11px] font-mono select-none uppercase tracking-wider">
                   Isi visualisasi preview berdasarkan semua isu aktif
                 </div>
@@ -910,11 +925,11 @@ export default function Home() {
       </main>
 
       {/* ==========================================
-          MODAL: PEMBUATAN PROYEK BARU (Design Tweak: Rounded-xl)
+          MODAL: PEMBUATAN PROYEK BARU
           ========================================== */}
       {isNewProjectModalOpen && (
-        <div className="fixed inset-0 bg-text-primary/10 backdrop-blur-[1px] flex items-center justify-center z-50">
-          <div className="w-[640px] bg-bg-surface border border-border-default rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-text-primary/15 backdrop-blur-[1.5px] flex items-center justify-center z-50">
+          <div className="w-[640px] bg-bg-surface border border-border-default rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] flex flex-col max-h-[90vh] overflow-hidden">
             
             {/* Header Modal */}
             <div className="h-10 px-4 border-b border-border-default flex items-center justify-between text-text-muted text-[11px] select-none uppercase tracking-wider bg-[#fbfbfb]">
@@ -950,14 +965,14 @@ export default function Home() {
                   placeholder="Tambahkan ringkasan performa atau deskripsi singkat..." 
                   value={newProjSummary}
                   onChange={(e) => setNewProjSummary(e.target.value)}
-                  className="w-full text-[13px] text-text-secondary placeholder-text-muted border-none p-0 focus:ring-0 focus:outline-none mt-2.5"
+                  className="w-full text-[13px] text-text-secondary placeholder-text-muted border-none p-0 focus:ring-0 focus:outline-none mt-2.5 font-medium"
                 />
               </div>
 
-              {/* Barisan Opsi Filter Kapsul (Metadata Pills setinggi 24px) */}
+              {/* Barisan Opsi Filter Kapsul (Metadata Pills) */}
               <div className="flex flex-wrap gap-1.5 pt-3 border-t border-border-default select-none">
-                <div className="h-6 px-2.5 bg-bg-canvas hover:bg-bg-element rounded-full border border-border-default text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
-                  <span className="font-semibold text-text-muted">⚙️ Status:</span>
+                <div className="h-6.5 px-3 bg-bg-canvas hover:bg-bg-element rounded-full border border-border-default text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
+                  <span className="font-bold text-text-muted">⚙️ Status:</span>
                   <select 
                     value={newProjStatus} 
                     onChange={(e) => setNewProjStatus(e.target.value as 'Backlog' | 'Active')}
@@ -968,8 +983,8 @@ export default function Home() {
                   </select>
                 </div>
 
-                <div className="h-6 px-2.5 bg-bg-canvas hover:bg-bg-element rounded-full border border-border-default text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
-                  <span className="font-semibold text-text-muted">📊 Prioritas:</span>
+                <div className="h-6.5 px-3 bg-bg-canvas hover:bg-bg-element rounded-full border border-border-default text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
+                  <span className="font-bold text-text-muted">📊 Prioritas:</span>
                   <select 
                     value={newProjPriority} 
                     onChange={(e) => setNewProjPriority(e.target.value as 'Low' | 'Medium' | 'High' | 'Urgent')}
@@ -982,8 +997,8 @@ export default function Home() {
                   </select>
                 </div>
 
-                <div className="h-6 px-2.5 bg-bg-canvas hover:bg-bg-element rounded-full border border-border-default text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
-                  <span className="font-semibold text-text-muted">👤 Pemimpin:</span>
+                <div className="h-6.5 px-3 bg-bg-canvas hover:bg-bg-element rounded-full border border-border-default text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
+                  <span className="font-bold text-text-muted">👤 Pemimpin:</span>
                   <select 
                     value={newProjLead} 
                     onChange={(e) => setNewProjLead(e.target.value)}
@@ -994,13 +1009,13 @@ export default function Home() {
                   </select>
                 </div>
 
-                <div className="h-6 px-2.5 bg-bg-surface hover:bg-bg-canvas rounded-full border border-border-default text-text-muted hover:text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
+                <div className="h-6.5 px-3 bg-bg-surface hover:bg-bg-canvas rounded-full border border-border-default text-text-muted hover:text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors font-semibold">
                   <span>+ Anggota</span>
                 </div>
-                <div className="h-6 px-2.5 bg-bg-surface hover:bg-bg-canvas rounded-full border border-border-default text-text-muted hover:text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
+                <div className="h-6.5 px-3 bg-bg-surface hover:bg-bg-canvas rounded-full border border-border-default text-text-muted hover:text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors font-semibold">
                   <span>📅 Tanggal Target</span>
                 </div>
-                <div className="h-6 px-2.5 bg-bg-surface hover:bg-bg-canvas rounded-full border border-border-default text-text-muted hover:text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors">
+                <div className="h-6.5 px-3 bg-bg-surface hover:bg-bg-canvas rounded-full border border-border-default text-text-muted hover:text-text-secondary text-[11px] flex items-center gap-1 cursor-pointer transition-colors font-semibold">
                   <span>🏷️ Label</span>
                 </div>
               </div>
@@ -1010,13 +1025,13 @@ export default function Home() {
                 <textarea 
                   rows={4}
                   placeholder="Tuliskan deskripsi lengkap, rencana performa divisi, atau kumpulkan ide kinerja tim di sini..."
-                  className="w-full text-[13px] text-text-primary placeholder-text-muted border-none p-0 focus:ring-0 focus:outline-none resize-none"
+                  className="w-full text-[13px] text-text-primary placeholder-text-muted border-none p-0 focus:ring-0 focus:outline-none resize-none font-medium"
                 ></textarea>
               </div>
 
               {/* Milestones Accordion */}
-              <div className="border border-border-default rounded-[6px] p-3 flex justify-between items-center text-[12px] bg-bg-canvas/30 cursor-pointer hover:bg-bg-canvas/50">
-                <span className="font-semibold text-text-secondary">Milestone / Sasaran Utama</span>
+              <div className="border border-border-default rounded-[6px] p-3 flex justify-between items-center text-[12px] bg-bg-canvas/30 cursor-pointer hover:bg-bg-canvas/50 select-none">
+                <span className="font-bold text-text-secondary">Milestone / Sasaran Utama</span>
                 <span className="text-text-muted font-bold">+</span>
               </div>
             </form>
@@ -1026,13 +1041,13 @@ export default function Home() {
               <button 
                 type="button"
                 onClick={() => setIsNewProjectModalOpen(false)}
-                className="h-8 px-3 hover:bg-bg-element text-text-secondary hover:text-text-primary text-[12px] font-semibold rounded-md cursor-pointer"
+                className="h-8.5 px-4.5 hover:bg-bg-element text-text-secondary hover:text-text-primary text-[12px] font-bold rounded-lg cursor-pointer"
               >
                 Batalkan
               </button>
               <button 
                 onClick={handleCreateProject}
-                className="h-8 px-4 bg-accent hover:bg-accent/95 text-white text-[12px] font-semibold rounded-md cursor-pointer transition-colors duration-75 shadow-sm"
+                className="h-8.5 px-5 bg-accent hover:bg-accent/95 text-white text-[12px] font-bold rounded-lg cursor-pointer transition-colors duration-75 shadow-sm btn-active-scale"
               >
                 Buat Proyek
               </button>
@@ -1043,11 +1058,11 @@ export default function Home() {
       )}
 
       {/* ==========================================
-          MODAL MENU KOMANDO (Cmd+K atau Ctrl+K - Tweak: Rounded-xl & shadow)
+          MODAL MENU KOMANDO (Cmd+K atau Ctrl+K)
           ========================================== */}
       {isCommandMenuOpen && (
         <div className="fixed inset-0 bg-text-primary/10 backdrop-blur-[1px] flex items-center justify-center z-50">
-          <div className="w-[560px] md:w-[640px] bg-bg-surface border border-border-default rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden">
+          <div className="w-[560px] md:w-[640px] bg-bg-surface border border-border-default rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] flex flex-col overflow-hidden premium-popover">
             
             {/* Input Pencarian */}
             <div className="flex items-center px-4 h-11 border-b border-border-default bg-[#fbfbfb]">
@@ -1057,14 +1072,14 @@ export default function Home() {
                 placeholder="Ketik kata kunci untuk mencari isu atau menjalankan tindakan..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-transparent border-none text-[13px] text-text-primary focus:outline-none focus:ring-0 placeholder-text-muted ml-2.5 outline-none"
+                className="flex-1 bg-transparent border-none text-[13px] text-text-primary focus:outline-none focus:ring-0 placeholder-text-muted ml-2.5 outline-none font-medium"
                 autoFocus
               />
-              <span className="text-[10px] text-text-muted bg-bg-canvas px-1.5 py-0.5 rounded font-mono border border-border-default select-none">ESC</span>
+              <span className="kbd-key select-none">ESC</span>
             </div>
 
             {/* Hasil Pencarian */}
-            <div className="max-h-[300px] overflow-y-auto py-1 divide-y divide-border-default/40">
+            <div className="max-h-[300px] overflow-y-auto py-1 divide-y divide-border-default/40 font-medium">
               <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-wider select-none bg-bg-canvas/30">Isu & Tugas Terkait</div>
               
               {commandResults.length > 0 ? (
@@ -1080,9 +1095,9 @@ export default function Home() {
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-mono text-text-muted text-[10px] w-12 shrink-0 select-all">{res.id}</span>
-                      <span className="truncate text-text-secondary group-hover:text-text-primary font-medium">{res.title}</span>
+                      <span className="truncate text-text-secondary group-hover:text-text-primary font-bold">{res.title}</span>
                     </div>
-                    <span className="text-[10px] bg-bg-canvas text-text-secondary px-2 py-0.5 rounded border border-border-default uppercase font-mono font-medium">{res.status}</span>
+                    <span className="text-[10px] bg-bg-canvas text-text-secondary px-2 py-0.5 rounded border border-border-default uppercase font-mono font-bold">{res.status}</span>
                   </div>
                 ))
               ) : (
@@ -1094,17 +1109,17 @@ export default function Home() {
               <div className="px-3 py-1.5 text-[10px] font-bold text-text-muted uppercase tracking-wider pt-2 select-none bg-bg-canvas/30">Tindakan Navigasi</div>
               <div 
                 onClick={() => { setActiveTab('projects'); setIsCommandMenuOpen(false); }}
-                className="px-4 py-2 hover:bg-bg-canvas cursor-pointer flex items-center justify-between text-[12px] font-medium"
+                className="px-4 py-2 hover:bg-bg-canvas cursor-pointer flex items-center justify-between text-[12px]"
               >
                 <span className="text-text-secondary hover:text-text-primary">Buka Dashboard Proyek Kinerja</span>
-                <span className="text-[10px] text-text-muted font-mono bg-bg-canvas px-1 rounded border border-border-default uppercase font-medium">Navigasi</span>
+                <span className="text-[10px] text-text-muted font-mono bg-bg-canvas px-1.5 rounded border border-border-default uppercase font-bold">Navigasi</span>
               </div>
               <div 
                 onClick={() => { setIsNewProjectModalOpen(true); setIsCommandMenuOpen(false); }}
-                className="px-4 py-2 hover:bg-bg-canvas cursor-pointer flex items-center justify-between text-[12px] font-medium"
+                className="px-4 py-2 hover:bg-bg-canvas cursor-pointer flex items-center justify-between text-[12px]"
               >
                 <span className="text-text-secondary hover:text-text-primary">Buat Proyek Kinerja Baru</span>
-                <span className="text-[10px] text-text-muted font-mono bg-bg-canvas px-1 rounded border border-border-default uppercase font-medium">Tindakan</span>
+                <span className="text-[10px] text-text-muted font-mono bg-bg-canvas px-1.5 rounded border border-border-default uppercase font-bold">Tindakan</span>
               </div>
             </div>
           </div>
@@ -1114,8 +1129,8 @@ export default function Home() {
       {/* Toast Message */}
       {toastMessage && (
         <div className="fixed bottom-4 right-4 bg-bg-surface text-text-primary text-xs px-3.5 py-2.5 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.05)] border border-border-default flex items-center gap-2 z-50 select-none">
-          <div className="w-1.5 h-1.5 rounded-full bg-success"></div>
-          <span className="font-semibold">{toastMessage}</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_6px_rgba(16,185,129,0.5)]"></div>
+          <span className="font-bold">{toastMessage}</span>
         </div>
       )}
       

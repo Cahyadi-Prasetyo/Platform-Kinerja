@@ -9,9 +9,9 @@
   --text-secondary: #71717a;
   --text-muted: #a1a1aa;
   --accent: #5e6ad2;
-  --success: #4ade80;
-  --warning: #fbbf24;
-  --danger: #f87171;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
 }
 
 @theme {
@@ -47,10 +47,35 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Premium Dot Grid Background Pattern */
+.bg-dot-pattern {
+  background-image: radial-gradient(var(--border-default) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Hardware-style keyboard shortcut keys */
+.kbd-key {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-bottom: 2px solid var(--border-default);
+  border-radius: 3px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.03);
+  color: var(--text-secondary);
+}
+
+/* Micro-shadow for popovers */
+.premium-popover {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
 /* Smooth micro-shadow scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -61,4 +86,9 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Scale animations on click */
+.btn-active-scale:active {
+  transform: scale(0.98);
 }
