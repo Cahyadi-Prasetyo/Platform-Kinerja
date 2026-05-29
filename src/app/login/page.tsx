@@ -58,12 +58,11 @@ export default function Login() {
         {/* Centered Logo & Title */}
         <div className="flex flex-col items-center space-y-3">
           <div className="w-14 h-14 bg-bg-surface border border-border-default rounded-xl shadow-sm flex items-center justify-center p-2.5 transition-transform duration-300 hover:scale-105">
-            <Image 
-              src="/logo.png" 
+            <img 
+              src="/logo.png?v=2" 
               alt="Platform Kinerja Logo" 
               width={40} 
               height={40}
-              priority
               className="object-contain"
             />
           </div>

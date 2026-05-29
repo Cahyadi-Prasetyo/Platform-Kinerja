@@ -132,8 +132,8 @@ const IconStatusCompleted = () => (
 
 // --- LOGO BRANDING ---
 const LogoIcon = () => (
-  <Image 
-    src="/logo.png" 
+  <img 
+    src="/logo.png?v=2" 
     alt="Brand Logo" 
     width={18} 
     height={18}
