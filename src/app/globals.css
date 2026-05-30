@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --bg-canvas: #f4f4f5;
-  --bg-surface: #ffffff;
-  --bg-element: #eaeaea;
-  --border-default: #e4e4e7;
-  --text-primary: #18181b;
-  --text-secondary: #71717a;
-  --text-muted: #a1a1aa;
-  --accent: #5e6ad2;
+  --bg-canvas: #ffffff;
+  --bg-surface: #f9fafb;
+  --bg-element: #f3f4f6;
+  --border-default: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --accent: #0369a1;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -35,7 +35,7 @@
 /* Custom Outlines and Shadows */
 .keyboard-focus:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 /* Base resets in accordance to DESIGN.md */
@@ -63,13 +63,12 @@ body {
   border: 1px solid var(--border-default);
   border-bottom: 2px solid var(--border-default);
   border-radius: 3px;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.03);
   color: var(--text-secondary);
 }
 
 /* Micro-shadow for popovers */
 .premium-popover {
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-default);
 }
 
 /* Smooth micro-shadow scrollbars */

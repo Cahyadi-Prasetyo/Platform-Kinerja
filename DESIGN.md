@@ -1,71 +1,102 @@
-# DESIGN SYSTEM & UI SPECIFICATION (DESIGN.md)
-## Project: Team Performance Monitoring Platform (Linear Workspace Light-Mode Variant)
-
-Dokumen ini adalah panduan visual resmi untuk AI Agent dan Frontend Developer. Seluruh komponen wajib mengikuti estetika aplikasi internal (workspace) Linear.app: menggunakan skema off-white, kontras mikro, layout multi-panel, dan elemen berdensitas tinggi.
-
+---
+name: SIMANTAP Project Management
+description: Minimalist, fast, and structured performance monitoring dashboard for teams.
+colors:
+  primary: "#0369A1"
+  background: "#FFFFFF"
+  surface: "#F9FAFB"
+  surface-hover: "#F3F4F6"
+  text-primary: "#111827"
+  text-secondary: "#6B7280"
+  border: "#E5E7EB"
+  success: "#10B981"
+  warning: "#F59E0B"
+  error: "#EF4444"
+typography:
+  h1:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 1.5rem
+    fontWeight: 600
+    lineHeight: 1.2
+  h2:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 1rem
+    fontWeight: 600
+    lineHeight: 1.5
+  body-md:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 0.875rem
+    fontWeight: 400
+    lineHeight: 1.5
+  label-sm:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 0.75rem
+    fontWeight: 500
+rounded:
+  sm: 4px
+  md: 6px
+  lg: 8px
+  full: 9999px
+spacing:
+  xs: 4px
+  sm: 8px
+  md: 16px
+  lg: 24px
+  xl: 32px
+  2xl: 48px
+components:
+  card:
+    backgroundColor: "{colors.surface}"
+    border: "1px solid {colors.border}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+  sidebar-item-active:
+    backgroundColor: "{colors.surface-hover}"
+    textColor: "{colors.text-primary}"
+  list-row:
+    borderBottom: "1px solid {colors.border}"
+    padding: "{spacing.sm} 0"
+  badge-status:
+    padding: "2px 8px"
+    rounded: "{rounded.full}"
+    fontSize: "{typography.label-sm.fontSize}"
+    fontWeight: 500
+    border: "1px solid {colors.border}"
+  accordion-header:
+    padding: "{spacing.md} 0"
+    borderBottom: "1px solid {colors.border}"
+    textColor: "{colors.text-primary}"
+    fontWeight: 600
+  chart-container:
+    backgroundColor: "{colors.background}"
+    border: "1px solid {colors.border}"
+    rounded: "{rounded.md}"
+    padding: "{spacing.lg}"
+  profile-sidebar:
+    backgroundColor: "{colors.background}"
+    borderLeft: "1px solid {colors.border}"
+    padding: "0"
 ---
 
-## 1. UI Architecture & Layout Principle
+## Overview
+SIMANTAP is a professional, data-driven team performance monitoring platform. The design prioritizes extreme clarity, fast scanning of information, and a productive, noise-free environment. It adopts a utilitarian, minimalist aesthetic akin to modern developer tools.
 
-Aplikasi tidak menggunakan halaman web konvensional, melainkan struktur *Productivity App* yang kaku namun efisien:
+## Colors
+The palette is intentionally subdued. The pure white (`#FFFFFF`) background creates a clean canvas. Surface colors (`#F9FAFB`) are used strictly for secondary areas like the sidebar or empty states. The primary color (`#0369A1`) is reserved for critical active states and primary buttons to ensure high visibility without overwhelming the user.
 
-* **Dual-Surface Contrast:** Latar belakang dasar (*canvas*) menggunakan warna abu-abu sangat muda (off-white). Area kerja utama (tabel, daftar tugas, dashboard) dibungkus dalam kontainer putih bersih dengan border tipis untuk menciptakan kedalaman visual tanpa bayangan (*shadow*).
-* **High-Density Layout:** Jarak antar elemen (*padding/margin*) sangat rapat. Informasi dimaksimalkan agar muat dalam satu layar tanpa *scrolling* yang tidak perlu.
-* **Frameless Primitives:** Input form dan judul halaman tidak memiliki kotak atau border penutup tradisional. Elemen menggunakan teks polos yang langsung dapat diedit di tempat (*inline editing*).
+## Typography
+Geometric sans-serif (Inter) drives the interface. The type scale is tight and compact (body text at 14px) to allow for high data density on list views, while maintaining readability through generous line-heights. 
 
----
+## Spacing & Layout
+The layout utilizes a classic SaaS structure with a fixed top navigation and a left sidebar. The spacing relies on a strict 8px grid system to establish a predictable vertical and horizontal rhythm. 
 
-## 2. Design Tokens (Light Mode Palettes)
+## Shapes
+Corners are subtly rounded (6px for most interactive elements) to appear modern but professional. Avatars and status indicators use full pill shapes (9999px) to contrast with the rectangular structural elements.
 
-Gunakan variabel warna di bawah ini (atau padanannya dalam Tailwind CSS Zinc/Slate) untuk membangun UI:
+## Elevation & Depth
+This design uses a strict **Flat Design** philosophy. Depth and structural hierarchy are achieved exclusively through 1px hairline borders (`#E5E7EB`) and background color contrasts (e.g., white main canvas vs. light gray sidebar). 
 
-| Token | Nilai Hex | Tailwind Class | Penggunaan Utama |
-| :--- | :--- | :--- | :--- |
-| `--bg-canvas` | `#f4f4f5` | `bg-zinc-100` | Latar belakang dasar aplikasi & sidebar kiri. |
-| `--bg-surface` | `#ffffff` | `bg-white` | Kontainer utama area kerja, modul dashboard, & modal. |
-| `--bg-element` | `#eaeaea` | `bg-zinc-200/60` | Efek hover pada baris daftar, button aktif, & dropdown. |
-| `--border-default`| `#e4e4e7` | `border-zinc-200`| Garis pemisah komponen (wajib `1px solid`). |
-| `--text-primary` | `#18181b` | `text-zinc-900` | Teks utama, judul proyek, skor KPI, nama pegawai. |
-| `--text-secondary`| `#71717a` | `text-zinc-500` | Target tanggal, ID metrik (e.g., TIM-1), label menu. |
-| `--text-muted` | `#a1a1aa` | `text-zinc-400` | Placeholder input, shortcut hint, ikon non-aktif. |
-
-### Warna Status & Prioritas (Muted Tone)
-* **No Priority / Backlog:** `#71717a` (Ikon garis putus-putus)
-* **High/Urgent:** `#f87171` (Muted Red)
-* **In Progress / Medium:** `#fbbf24` (Muted Amber)
-* **Completed / Success:** `#4ade80` (Muted Green)
-
----
-
-## 3. Component Specifications (Spesifikasi Komponen)
-
-### A. Sidebar Navigasi Kiri (Workspace Navigation)
-* **Karakteristik:** Lebar tetap `240px`, background `--bg-canvas`.
-* **Struktur Teks:** Nama akun/workspace di paling atas dengan dropdown kecil. Label kategori menggunakan font size `11px` (`text-xs`), bold, warna `--text-secondary` (All-Caps).
-* **Menu Item:** Tinggi `28px` hingga `32px`. Efek hover instan mengubah background menjadi `--bg-element` dengan `border-radius: 4px`. Angka notifikasi di sisi kanan menggunakan teks kecil tanpa badge kapsul tebal.
-
-### B. High-Density Row List (Daftar Metrik / Tugas Kinerja)
-* **Struktur Baris:** Tinggi baris maksimal `36px` (`py-1.5`).
-* **Elemen Horizontal:** [Checkbox/Ikon Status] -> [ID Metrik, e.g., KPI-12] -> [Judul/Nama Tugas] -> [Avatar Kecil] -> [Tanggal Target].
-* **Garis Pemisah:** Setiap baris dipisahkan oleh `border-b: 1px solid var(--border-default)`. Baris terakhir menyatu dengan kontainer putih.
-
-### C. Frameless Project/Metric Creator (Form Pembuatan)
-* **Title Input:** Teks berukuran `text-xl` atau `text-2xl`, font-weight semi-bold, warna `--text-primary`, tanpa border box (`border-none focus:ring-0`).
-* **Metadata Inline Pills:** Di bawah judul, terdapat deretan tombol opsi (*Pills*) untuk konfigurasi cepat (e.g., Assignee, Due Date, Priority).
-  * *Styling Pills:* Background `transparent` atau `white`, border `1px solid var(--border-default)`, `border-radius: 9999px` (capsule), tinggi `24px`, font `text-xs`.
-
-### D. Multi-Panel Dashboard (Split-View Workspace)
-* **Main Section (Kiri):** Mengambil `70%` hingga `75%` lebar layar. Berisi tabel utama data performa tim.
-* **Insight Panel (Kanan):** Mengambil `25%` hingga `30%` lebar layar. Dipisahkan oleh border vertikal `1px`. Berisi ringkasan statis seperti tab "Health" dan "Leads" untuk melihat efisiensi kerja tim secara makro.
-
-### E. Popover / Dropdown Menu
-* **Visual:** Latar belakang wajib `--bg-surface` (`bg-white`), radius `rounded-lg` (8px).
-* **Shadow:** Menggunakan *micro-shadow* yang sangat tipis agar elemen terlihat sedikit terangkat: `box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.05)`.
-
----
-
-## 4. Elemen Interaktif & Aturan Teknis Frontend
-
-* **Typography:** Wajib menggunakan font `Geist Sans` atau `Inter` dengan `tracking-tight`. Untuk bagian angka/skor kinerja, wajib menggunakan utility CSS `tabular-nums` agar sejajar secara vertikal.
-* **Iconography:** Menggunakan `Lucide React` atau `Radix Icons`. Ukuran dikunci pada `14px` atau `16px`. Ketebalan garis (*stroke width*) wajib `1.5px`.
-* **Zero Animation Delay:** Efek hover pada tombol, menu item, dan baris daftar tidak boleh menggunakan durasi animasi yang lambat (`transition-none` atau `duration-75`). Interaksi harus terasa instan dan responsif.
+## Rules to Never Break
+- Never use box-shadow utilities for structural elements, modals, or cards.
+- Never use multiple bright accent colors; stick to the semantic palette (Success, Warning, Error) only when status indicators require it.
+- Always ensure active sidebar states have a clear visual contrast from inactive states.
