@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'summary' | 'assigned' | 'created' | 'subscribed' | 'activity'>('summary');
   const [currentUser, setCurrentUser] = useState<{ email: string; name: string } | null>(null);
   const [items, setItems] = useState<WorkItem[]>([]);
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     const rawUser = localStorage.getItem('user');
@@ -47,6 +48,7 @@ export default function ProfilePage() {
       } else {
         projectsList = [{ id: 'magangumra', name: 'MAGANG UMRAH 2026' }];
       }
+      setProjects(projectsList);
 
       const allItems: WorkItem[] = [];
       projectsList.forEach((proj: any) => {
@@ -254,7 +256,8 @@ export default function ProfilePage() {
   }, []);
 
   const userDisplayName = currentUser?.name || 'Cahyadi Prasetyo';
-  const userInitials = userDisplayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const cleanName = userDisplayName.replace(/^[0-9-\s]+/, '');
+  const userInitials = cleanName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   const assignedItems = items.filter(item => {
     const isNameMatch = item.assigneeName?.toLowerCase().includes(userDisplayName.toLowerCase()) || 
@@ -759,15 +762,29 @@ export default function ProfilePage() {
               <div className="mt-6 pt-6 border-t border-[#E5E7EB] space-y-3">
                 <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider select-none">Projects</span>
                 
-                <div className="border border-[#E5E7EB] rounded-[6px] px-3 py-2.5 bg-[#F9FAFB] flex items-center justify-between text-xs font-semibold select-none">
-                  <div className="flex items-center gap-2 truncate">
-                    <IconShieldProject />
-                    <span className="text-[#111827] truncate">MAGANG UMRAH 2026</span>
-                  </div>
-                  <span className="text-[10px] bg-green-50 text-green-700 font-bold px-1.5 py-0.5 rounded border border-green-200">
-                    99%
-                  </span>
-                </div>
+                {projects.map((proj, idx) => {
+                  const projItems = items.filter(it => it.projectId === proj.id);
+                  const completedProjItems = projItems.filter(it => it.status === 'completed' || it.status === 'done');
+                  const percent = projItems.length > 0 ? Math.round((completedProjItems.length / projItems.length) * 100) : 0;
+                  
+                  return (
+                    <div key={idx} className="border border-[#E5E7EB] rounded-[6px] px-3 py-2.5 bg-[#F9FAFB] flex items-center justify-between text-xs font-semibold select-none">
+                      <div className="flex items-center gap-2 truncate">
+                        <IconShieldProject />
+                        <span className="text-[#111827] truncate">{proj.name}</span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                        percent === 100 
+                          ? 'bg-green-50 text-green-700 border-green-200' 
+                          : percent > 0 
+                            ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                            : 'bg-gray-50 text-gray-700 border-gray-200'
+                      }`}>
+                        {percent}%
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
             </div>
