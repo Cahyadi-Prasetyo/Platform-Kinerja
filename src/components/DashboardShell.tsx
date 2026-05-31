@@ -618,13 +618,6 @@ export default function DashboardShell({
                 <span className="font-bold text-[14px] text-[#111827]">Projects</span>
                 <div className="flex items-center gap-2">
                   <button 
-                    onClick={() => showToast('Filters opened.')}
-                    className="p-1 hover:bg-[#F3F4F6] rounded transition-colors cursor-pointer"
-                    title="Filters"
-                  >
-                    <IconTuning />
-                  </button>
-                  <button 
                     onClick={toggleSidebar}
                     className="p-1 hover:bg-[#F3F4F6] rounded transition-colors cursor-pointer"
                     title="Collapse sidebar"
